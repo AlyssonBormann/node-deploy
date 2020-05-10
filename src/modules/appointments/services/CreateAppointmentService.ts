@@ -1,8 +1,10 @@
-import { startOfHour, isBefore, getHours } from 'date-fns';
-import { injectable, inject } from 'tsyringe';
+import { startOfHour, isBefore, getHours, format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
+import { injectable, inject, container } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
 
+import CreateNotificationService from '@modules/notifications/services/CreateNotificationService';
 import Appointment from '../infra/typeorm/entities/Appointment';
 import IAppointmentsRepository from '../repositories/IAppointmentsRepository';
 
@@ -52,6 +54,21 @@ class CreateAppointmentService {
       provider_id,
       user_id,
       date: appointmentDate,
+    });
+
+    const createNotification = container.resolve(CreateNotificationService);
+
+    const user = await appointment.user;
+
+    const appointmentDateFormatted = format(
+      appointmentDate,
+      "dd 'de' MMMM 'às' HH:mm'h'",
+      { locale: ptBR },
+    );
+
+    await createNotification.execute({
+      recipient_id: provider_id,
+      content: `Novo agendamento com ${user.name} dia ${appointmentDateFormatted}`,
     });
 
     return appointment;
