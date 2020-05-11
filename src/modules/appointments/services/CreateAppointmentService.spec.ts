@@ -1,22 +1,38 @@
-import AppError from '@shared/errors/AppError';
+import 'reflect-metadata';
 
+import AppError from '@shared/errors/AppError';
+import { container } from 'tsyringe';
+
+import FakeCacheProvider from '@shared/container/providers/CacheProvider/fakes/FakeCacheProvider';
 import FakeAppointmentsRepository from '../repositories/fakes/FakeAppointmentsRepository';
 import CreateAppointmentService from './CreateAppointmentService';
 
 let fakeAppointmentsRepository: FakeAppointmentsRepository;
+let fakeCacheProvider: FakeCacheProvider;
 let createAppointment: CreateAppointmentService;
 
 describe('CreateAppointment', () => {
   beforeEach(() => {
     fakeAppointmentsRepository = new FakeAppointmentsRepository();
+    fakeCacheProvider = new FakeCacheProvider();
+
     createAppointment = new CreateAppointmentService(
       fakeAppointmentsRepository,
+      fakeCacheProvider,
     );
   });
 
   it('should be able to create a new appointment', async () => {
     jest.spyOn(Date, 'now').mockImplementationOnce(() => {
       return new Date(2020, 4, 10, 12).getTime();
+    });
+
+    const sendNotificationFunction = jest.fn();
+
+    jest.spyOn(container, 'resolve').mockImplementationOnce(() => {
+      return {
+        execute: sendNotificationFunction,
+      };
     });
 
     const appointment = await createAppointment.execute({
@@ -27,6 +43,7 @@ describe('CreateAppointment', () => {
 
     expect(appointment).toHaveProperty('id');
     expect(appointment.provider_id).toBe('provider-id');
+    expect(sendNotificationFunction).toHaveBeenCalled();
   });
 
   it('should not be able to create two appointments on the same time', async () => {
