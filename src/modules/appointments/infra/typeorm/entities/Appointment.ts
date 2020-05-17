@@ -25,9 +25,9 @@ class Appointment {
   @Column()
   user_id: string;
 
-  @ManyToOne(() => User, { lazy: true })
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })
-  user: Promise<User>;
+  user: User;
 
   @Column('timestamp with time zone')
   date: Date;
