@@ -55,7 +55,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd ~/app/node-deploy
-          ./node_modules/.bin/typeorm migration:run
+          npx typeorm migration:run
           
     - name: Run migrations on Digital Ocean
       uses: appleboy/ssh-action@master
