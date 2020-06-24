@@ -35,7 +35,7 @@ jobs:
         source: ".,!node_modules"
         target: "~/app/node-deploy"
         
-    - name: Install dependencies on Digital Ocean
+    - name: Run production scripts
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SSH_HOST }}
